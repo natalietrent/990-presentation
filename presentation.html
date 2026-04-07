@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>990 Tax and Audit — Pocketbook Strategies</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:       #384170;
+      --navy-dark:  #252d50;
+      --teal:       #1DD3B0;
+      --teal-dark:  #15a08a;
+      --pink:       #FFB2B9;
+      --lavender:   #CFC5FE;
+      --orange:     #F15E22;
+      --periwinkle: #7890CD;
+      --peach:      #F4D6AD;
+      --white:      #FFFFFF;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html,body { width:100%; height:100%; background:var(--navy-dark); overflow:hidden; font-family:'Lato',sans-serif; }
+
+    /* ====== DECK + PARTICLE LAYER ====== */
+    .deck { width:100vw; height:100vh; position:relative; overflow:hidden; }
+
+    #particle-canvas {
+      position:absolute; inset:0; z-index:0; pointer-events:none;
+      width:100%; height:100%;
+    }
+
+    /* ====== SLIDES ====== */
+    .slide {
+      position:absolute; inset:0; z-index:1;
+      background:rgba(56,65,112,0.91);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:44px 72px;
+      transform:translateX(100%);
+      transition:transform 0.55s cubic-bezier(0.86,0,0.07,1);
+      will-change:transform;
+    }
+    .slide.active { transform:translateX(0); }
+    .slide.prev   { transform:translateX(-100%); }
+
+    /* ====== TYPOGRAPHY ====== */
+    .slide-title {
+      font-family:'Montserrat',sans-serif; font-weight:900;
+      font-size:clamp(2.2rem,4vw,3.2rem);
+      color:var(--teal); text-align:center; margin-bottom:8px;
+    }
+    .slide-subtitle {
+      font-size:clamp(1.1rem,2vw,1.4rem);
+      color:rgba(255,255,255,0.65); text-align:center; margin-bottom:28px;
+    }
+    .body-text { font-size:clamp(1rem,1.7vw,1.2rem); color:var(--white); line-height:1.65; }
+    .highlight        { color:var(--teal);   font-weight:700; }
+    .highlight-orange { color:var(--orange); font-weight:700; }
+    .highlight-pink   { color:var(--pink);   font-weight:700; }
+
+    /* ====== FIXED UI ====== */
+    .nav-btn {
+      position:fixed; top:50%; transform:translateY(-50%);
+      background:rgba(29,211,176,0.1); border:2px solid rgba(29,211,176,0.3);
+      color:var(--teal); width:50px; height:50px; border-radius:50%;
+      font-size:24px; cursor:pointer; transition:all 0.2s; z-index:1000;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .nav-btn:hover { background:var(--teal); color:var(--navy); }
+    #prev-btn { left:18px; }
+    #next-btn { right:18px; }
+
+    .progress {
+      position:fixed; bottom:0; left:0; height:3px;
+      background:linear-gradient(90deg,var(--teal),var(--periwinkle));
+      transition:width 0.4s ease; z-index:1000;
+    }
+    .counter {
+      position:fixed; top:16px; right:24px;
+      font-family:'Montserrat',sans-serif; font-size:12px;
+      color:rgba(255,255,255,0.35); z-index:1000; letter-spacing:1px;
+    }
+    .watermark {
+      position:fixed; bottom:10px; left:18px;
+      font-size:11px; color:rgba(255,255,255,0.2);
+      font-family:'Lato',sans-serif; z-index:1000;
+    }
+
+    /* ====== DIVIDER ====== */
+    .divider {
+      width:72px; height:3px;
+      background:linear-gradient(90deg,var(--teal),var(--periwinkle));
+      border-radius:2px; margin:14px auto;
+    }
+
+    /* ====== CARDS ====== */
+    .card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:24px 30px; }
+    .card-teal { background:rgba(29,211,176,0.09); border-color:rgba(29,211,176,0.32); }
+
+    /* ====== BULLET LIST ====== */
+    .bullet-list { list-style:none; padding:0; }
+    .bullet-list li {
+      padding:10px 0 10px 28px; position:relative;
+      font-size:clamp(1rem,1.8vw,1.2rem); color:var(--white); line-height:1.55;
+      border-bottom:1px solid rgba(255,255,255,0.07);
+    }
+    .bullet-list li:last-child { border-bottom:none; }
+    .bullet-list li::before { content:'▸'; color:var(--teal); position:absolute; left:0; }
+
+    /* ====== BADGES ====== */
+    .badge { display:inline-block; padding:5px 16px; border-radius:20px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:0.82rem; letter-spacing:1px; }
+    .badge-teal     { background:var(--teal);     color:var(--navy); }
+    .badge-pink     { background:var(--pink);     color:var(--navy); }
+    .badge-lavender { background:var(--lavender); color:var(--navy); }
+    .badge-orange   { background:var(--orange);   color:white; }
+
+    /* ====== STAT BLOCKS ====== */
+    .stat-row { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+    .stat-block { text-align:center; padding:24px 32px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:14px; min-width:160px; }
+    .stat-number { font-family:'Montserrat',sans-serif; font-weight:900; font-size:clamp(2.8rem,5vw,4rem); color:var(--teal); line-height:1; }
+    .stat-label { font-size:0.85rem; color:rgba(255,255,255,0.55); margin-top:6px; font-family:'Montserrat',sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:1px; }
+
+    /* ====== THREE / TWO COLUMNS ====== */
+    .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; width:100%; }
+    .audit-col { border-radius:14px; padding:22px; text-align:center; }
+    .audit-col .icon { font-size:2.4rem; margin-bottom:10px; }
+    .audit-col h3 { font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.25rem; margin-bottom:10px; }
+    .audit-col p { font-size:clamp(0.9rem,1.5vw,1.05rem); }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; width:100%; }
+
+    /* ====== STEPS ====== */
+    .steps { display:flex; flex-direction:column; gap:10px; width:100%; }
+    .step { display:flex; align-items:center; gap:14px; padding:13px 20px; background:rgba(255,255,255,0.05); border-radius:10px; border-left:4px solid var(--teal); }
+    .step-num { font-family:'Montserrat',sans-serif; font-weight:900; font-size:1.4rem; color:var(--teal); min-width:32px; }
+    .step-text { font-size:clamp(0.95rem,1.6vw,1.1rem); color:var(--white); flex:1; }
+    .step-person { font-size:0.82rem; color:rgba(255,255,255,0.48); font-style:italic; white-space:nowrap; }
+
+    /* ====== DATE CARDS ====== */
+    .key-dates { display:flex; gap:18px; width:100%; max-width:760px; }
+    .date-card { flex:1; background:rgba(29,211,176,0.08); border:1px solid rgba(29,211,176,0.24); border-radius:14px; padding:20px; text-align:center; }
+    .date-card .date { font-family:'Montserrat',sans-serif; font-weight:900; font-size:1.6rem; color:var(--teal); }
+    .date-card .date-label { font-size:0.85rem; color:rgba(255,255,255,0.55); margin-top:5px; }
+
+    /* ====== SUMO ARENA ====== */
+    .sumo-arena { display:flex; align-items:flex-end; justify-content:center; gap:10px; margin-top:14px; position:relative; }
+    .sumo-wrapper { display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .sumo-label { font-family:'Montserrat',sans-serif; font-weight:800; color:var(--white); font-size:1.05rem; }
+    .sumo-sublabel { font-size:0.8rem; color:rgba(255,255,255,0.55); }
+
+    /* ====== SUMO ANIMATIONS ====== */
+    @keyframes clash-right {
+      0%,100% { transform:translateX(0) scaleX(-1); }
+      40%      { transform:translateX(32px) scaleX(-1); }
+      55%      { transform:translateX(26px) scaleX(-1); }
+      70%      { transform:translateX(32px) scaleX(-1); }
+    }
+    @keyframes clash-left {
+      0%,100% { transform:translateX(0); }
+      40%      { transform:translateX(-32px); }
+      55%      { transform:translateX(-26px); }
+      70%      { transform:translateX(-32px); }
+    }
+    @keyframes sumo-bounce {
+      0%,100% { transform:translateY(0); }
+      50%      { transform:translateY(-12px); }
+    }
+    @keyframes impact-pulse {
+      0%   { opacity:0; transform:scale(0.4) rotate(-10deg); }
+      30%  { opacity:1; transform:scale(1.4) rotate(5deg); }
+      70%  { opacity:1; transform:scale(1.1) rotate(0deg); }
+      100% { opacity:0; transform:scale(0.8) rotate(-5deg); }
+    }
+
+    /* ====== FOCUS SUMO LAYOUT ====== */
+    .sumo-focus { display:flex; align-items:center; gap:52px; width:100%; max-width:960px; }
+    .sumo-focus-info { flex:1; }
+    .sumo-focus-info .form-tag { font-family:'Montserrat',sans-serif; font-weight:700; font-size:0.9rem; text-transform:uppercase; letter-spacing:3px; margin-bottom:4px; }
+    .sumo-focus-info .form-name { font-family:'Montserrat',sans-serif; font-weight:900; font-size:clamp(3rem,5.5vw,4.5rem); color:var(--white); line-height:1; margin-bottom:14px; }
+
+    /* ====== TOOLS GRID ====== */
+    .tools-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; width:100%; max-width:960px; margin-top:8px; }
+    .tool-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:20px; text-align:center; transition:border-color 0.2s; }
+    .tool-card:hover { border-color:rgba(29,211,176,0.4); }
+    .tool-icon { font-size:2.2rem; display:block; margin-bottom:8px; }
+    .tool-name { font-family:'Montserrat',sans-serif; font-weight:800; font-size:1.05rem; color:var(--teal); margin-bottom:6px; }
+    .tool-desc { font-size:clamp(0.82rem,1.4vw,0.95rem); color:rgba(255,255,255,0.65); line-height:1.45; }
+
+    /* ====== 990 FORM MOCKUP ====== */
+    .form-mock-wrap {
+      display:flex; align-items:flex-start; gap:36px;
+      width:100%; max-width:980px;
+    }
+    .form-mock {
+      flex:1.4; background:#f7f6f0; border-radius:10px;
+      padding:18px 22px; font-family:'Courier New',monospace;
+      font-size:clamp(0.72rem,1.2vw,0.82rem);
+      color:#1a1a2e; max-height:70vh; overflow:hidden;
+      border:2px solid rgba(255,255,255,0.2);
+    }
+    .form-mock-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #333; padding-bottom:8px; margin-bottom:8px; }
+    .form-mock-header .form-num { font-size:1.3rem; font-weight:900; font-family:'Arial Black',sans-serif; color:#1a1a2e; }
+    .form-mock-header .form-right { text-align:right; font-size:0.7rem; line-height:1.4; }
+    .form-mock-title { font-size:0.78rem; font-weight:700; text-align:center; margin-bottom:4px; color:#1a1a2e; font-family:Arial,sans-serif; }
+    .form-mock-row { display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid #ccc; font-size:0.74rem; }
+    .form-mock-row:last-child { border-bottom:none; }
+    .form-mock-label { color:#555; font-family:Arial,sans-serif; }
+    .form-mock-value { font-weight:700; color:#1a1a2e; font-family:Arial,sans-serif; }
+    .form-mock-section { background:#1a1a2e; color:white; padding:3px 6px; margin:8px -4px 4px; font-size:0.72rem; font-weight:700; font-family:Arial,sans-serif; letter-spacing:0.5px; }
+    .form-mock-money { color:#1a3a6e; font-weight:700; }
+    .sample-badge { background:#F15E22; color:white; font-family:'Montserrat',sans-serif; font-weight:700; font-size:0.72rem; letter-spacing:2px; padding:2px 8px; border-radius:3px; margin-left:8px; vertical-align:middle; }
+    .form-callout { flex:1; display:flex; flex-direction:column; gap:14px; }
+    .callout-box { background:rgba(29,211,176,0.1); border:1px solid rgba(29,211,176,0.3); border-radius:12px; padding:16px 18px; }
+    .callout-box h3 { font-family:'Montserrat',sans-serif; font-weight:700; font-size:1rem; color:var(--teal); margin-bottom:6px; }
+    .callout-box p { font-size:clamp(0.88rem,1.5vw,1rem); color:rgba(255,255,255,0.85); line-height:1.5; }
+
+    /* ====== PARTICIPATION ====== */
+    .hand-icon { font-size:5rem; display:block; text-align:center; margin-bottom:16px; animation:sumo-bounce 1.5s ease-in-out infinite; }
+
+    /* ====== CONFETTI CANVAS ====== */
+    #confetti-canvas { position:fixed; top:0; left:0; pointer-events:none; z-index:9999; width:100vw; height:100vh; }
+
+    /* ====== TITLE SLIDE ====== */
+    #slide-1 { background:rgba(37,45,80,0.92); }
+    .title-main { font-family:'Montserrat',sans-serif; font-weight:900; font-size:clamp(2.8rem,5.5vw,4.8rem); color:var(--white); text-align:center; line-height:1.1; }
+    .title-teal { color:var(--teal); }
+    .title-sub  { font-size:clamp(1.1rem,2vw,1.5rem); color:rgba(255,255,255,0.6); text-align:center; margin-top:8px; margin-bottom:4px; }
+    .title-by   { font-size:clamp(0.95rem,1.7vw,1.2rem); color:rgba(255,255,255,0.45); text-align:center; font-style:italic; margin-bottom:6px; }
+    .title-date { font-family:'Montserrat',sans-serif; font-size:0.85rem; color:rgba(255,255,255,0.3); letter-spacing:2px; text-transform:uppercase; margin-top:16px; }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ======================================================
+     SVG SUMO DEFS
+     ====================================================== -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 990-N: cute & tiny, holding postcard -->
+    <g id="sumo-n">
+      <ellipse cx="50" cy="123" rx="26" ry="6" fill="rgba(0,0,0,0.18)"/>
+      <ellipse cx="37" cy="112" rx="13" ry="10" fill="#CFC5FE"/>
+      <ellipse cx="63" cy="112" rx="13" ry="10" fill="#CFC5FE"/>
+      <ellipse cx="50" cy="87" rx="36" ry="32" fill="#CFC5FE"/>
+      <path d="M17 85 Q50 97 83 85 L83 101 Q50 113 17 101Z" fill="#7890CD"/>
+      <text x="50" y="97" text-anchor="middle" font-family="Montserrat,Arial" font-weight="900" font-size="12" fill="white">990-N</text>
+      <ellipse cx="10" cy="84" rx="13" ry="9" fill="#CFC5FE" transform="rotate(-15 10 84)"/>
+      <ellipse cx="90" cy="84" rx="13" ry="9" fill="#CFC5FE" transform="rotate(15 90 84)"/>
+      <rect x="38" y="52" width="24" height="13" rx="4" fill="#F4D6AD"/>
+      <circle cx="50" cy="41" r="30" fill="#F4D6AD"/>
+      <ellipse cx="50" cy="13" rx="10" ry="11" fill="#384170"/>
+      <ellipse cx="50" cy="9"  rx="6"  ry="5"  fill="#252d50"/>
+      <path d="M40 37 Q43 34 46 37" stroke="#384170" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M54 37 Q57 34 60 37" stroke="#384170" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M38 50 Q50 59 62 50" stroke="#c4956b" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <rect x="62" y="72" width="28" height="20" rx="3" fill="white"/>
+      <line x1="65" y1="79" x2="87" y2="79" stroke="#CFC5FE" stroke-width="1.5"/>
+      <line x1="65" y1="83" x2="87" y2="83" stroke="#CFC5FE" stroke-width="1.5"/>
+      <line x1="65" y1="87" x2="78" y2="87" stroke="#CFC5FE" stroke-width="1.5"/>
+      <rect x="80" y="75" width="7" height="8" rx="1" fill="#F15E22" opacity="0.7"/>
+      <ellipse cx="34" cy="48" rx="8" ry="5" fill="#FFB2B9" opacity="0.45"/>
+      <ellipse cx="66" cy="48" rx="8" ry="5" fill="#FFB2B9" opacity="0.45"/>
+    </g>
+    <!-- 990-EZ: medium, determined -->
+    <g id="sumo-ez">
+      <ellipse cx="70" cy="167" rx="40" ry="8" fill="rgba(0,0,0,0.2)"/>
+      <ellipse cx="49" cy="153" rx="19" ry="13" fill="#FFB2B9"/>
+      <ellipse cx="91" cy="153" rx="19" ry="13" fill="#FFB2B9"/>
+      <ellipse cx="70" cy="118" rx="53" ry="45" fill="#FFB2B9"/>
+      <path d="M20 116 Q70 130 120 116 L120 134 Q70 148 20 134Z" fill="#F15E22"/>
+      <text x="70" y="129" text-anchor="middle" font-family="Montserrat,Arial" font-weight="900" font-size="15" fill="white">990-EZ</text>
+      <ellipse cx="13" cy="113" rx="17" ry="12" fill="#FFB2B9" transform="rotate(-20 13 113)"/>
+      <ellipse cx="127" cy="113" rx="17" ry="12" fill="#FFB2B9" transform="rotate(20 127 113)"/>
+      <rect x="52" y="70" width="36" height="16" rx="5" fill="#F4D6AD"/>
+      <circle cx="70" cy="57" r="41" fill="#F4D6AD"/>
+      <ellipse cx="70" cy="18" rx="15" ry="16" fill="#384170"/>
+      <ellipse cx="70" cy="11" rx="8"  ry="6"  fill="#252d50"/>
+      <circle cx="57" cy="51" r="7" fill="white"/>
+      <circle cx="57" cy="53" r="4" fill="#252d50"/>
+      <circle cx="83" cy="51" r="7" fill="white"/>
+      <circle cx="83" cy="53" r="4" fill="#252d50"/>
+      <line x1="49" y1="41" x2="63" y2="46" stroke="#252d50" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="91" y1="41" x2="77" y2="46" stroke="#252d50" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M58 69 Q70 74 82 69" stroke="#c4956b" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="42" cy="63" rx="9" ry="6" fill="#FFB2B9" opacity="0.4"/>
+      <ellipse cx="98" cy="63" rx="9" ry="6" fill="#FFB2B9" opacity="0.4"/>
+    </g>
+    <!-- 990: massive, fierce -->
+    <g id="sumo-990">
+      <ellipse cx="100" cy="242" rx="64" ry="10" fill="rgba(0,0,0,0.28)"/>
+      <ellipse cx="68"  cy="221" rx="29" ry="19" fill="#1DD3B0"/>
+      <ellipse cx="132" cy="221" rx="29" ry="19" fill="#1DD3B0"/>
+      <ellipse cx="100" cy="170" rx="82" ry="67" fill="#1DD3B0"/>
+      <path d="M22 166 Q100 184 178 166 L178 188 Q100 206 22 188Z" fill="#F15E22"/>
+      <text x="100" y="181" text-anchor="middle" font-family="Montserrat,Arial" font-weight="900" font-size="24" fill="white">990</text>
+      <ellipse cx="14"  cy="163" rx="24" ry="16" fill="#1DD3B0" transform="rotate(-26 14 163)"/>
+      <ellipse cx="186" cy="163" rx="24" ry="16" fill="#1DD3B0" transform="rotate(26 186 163)"/>
+      <rect x="76" y="97" width="48" height="25" rx="6" fill="#F4D6AD"/>
+      <circle cx="100" cy="80" r="62" fill="#F4D6AD"/>
+      <ellipse cx="100" cy="22" rx="22" ry="23" fill="#384170"/>
+      <ellipse cx="100" cy="14" rx="12" ry="9"  fill="#252d50"/>
+      <circle cx="82"  cy="73" r="9" fill="white"/>
+      <circle cx="82"  cy="76" r="5.5" fill="#252d50"/>
+      <circle cx="118" cy="73" r="9" fill="white"/>
+      <circle cx="118" cy="76" r="5.5" fill="#252d50"/>
+      <circle cx="85"  cy="71" r="2.5" fill="white"/>
+      <circle cx="121" cy="71" r="2.5" fill="white"/>
+      <line x1="70"  y1="59" x2="91"  y2="67" stroke="#252d50" stroke-width="5.5" stroke-linecap="round"/>
+      <line x1="130" y1="59" x2="109" y2="67" stroke="#252d50" stroke-width="5.5" stroke-linecap="round"/>
+      <ellipse cx="100" cy="88" rx="7" ry="5" fill="#e8c49a"/>
+      <path d="M83 103 Q100 99 117 103" stroke="#c4956b" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <ellipse cx="64"  cy="87" rx="13" ry="8" fill="#FFB2B9" opacity="0.45"/>
+      <ellipse cx="136" cy="87" rx="13" ry="8" fill="#FFB2B9" opacity="0.45"/>
+    </g>
+  </defs>
+</svg>
+
+<!-- ======================================================
+     DECK
+     ====================================================== -->
+<div class="deck">
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- SLIDE 1 · TITLE -->
+  <div class="slide active" id="slide-1">
+    <!-- PBS Logo SVG (redesigned) -->
+    <svg viewBox="0 0 230 72" width="230" style="margin-bottom:20px" xmlns="http://www.w3.org/2000/svg">
+      <!-- Cards fanning from wallet opening at pivot (31,26) -->
+      <rect x="13" y="4"  width="36" height="24" rx="4" fill="#7890CD" transform="rotate(16,31,26)"/>
+      <rect x="13" y="4"  width="36" height="24" rx="4" fill="#CFC5FE" transform="rotate(2,31,26)"/>
+      <rect x="13" y="4"  width="36" height="24" rx="4" fill="#FFB2B9" transform="rotate(-14,31,26)"/>
+      <!-- Wallet body -->
+      <rect x="5"  y="22" width="52" height="46" rx="8" fill="#1DD3B0"/>
+      <!-- Cover card overlap -->
+      <rect x="5"  y="30" width="52" height="38" fill="#1DD3B0"/>
+      <rect x="5"  y="60" width="52" height="8"  rx="8" fill="#1DD3B0"/>
+      <!-- Wallet top ridge -->
+      <rect x="5"  y="22" width="52" height="12" rx="6" fill="#17b899"/>
+      <!-- Clasp -->
+      <circle cx="31" cy="46" r="6.5" fill="#13967e"/>
+      <circle cx="31" cy="46" r="3.5" fill="#1DD3B0"/>
+      <!-- Text -->
+      <text x="68" y="40" font-family="Montserrat,Arial" font-weight="900" font-size="20" fill="#FFFFFF" letter-spacing="0.5">POCKETBOOK</text>
+      <text x="68" y="58" font-family="Montserrat,Arial" font-weight="600" font-size="11" fill="#1DD3B0" letter-spacing="4">STRATEGIES</text>
+    </svg>
+
+    <h1 class="title-main">990 Tax <span class="title-teal">&amp;</span> Audit</h1>
+    <div class="divider"></div>
+    <p class="title-sub">Skillshare Presentation</p>
+    <p class="title-by">by Natalie Trent</p>
+    <p class="title-date">April 7, 2026</p>
+  </div>
+
+  <!-- SLIDE 2 · WHY WE'RE HERE -->
+  <div class="slide" id="slide-2">
+    <h2 class="slide-title">Why Are We Here?</h2>
+    <p class="slide-subtitle">Tax season isn't just Natalie's problem anymore.</p>
+    <div class="stat-row" style="margin-bottom:26px">
+      <div class="stat-block">
+        <div class="stat-number">50+</div>
+        <div class="stat-label">Nonprofits We Serve</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-number">3</div>
+        <div class="stat-label">990 Form Types</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-number" style="font-size:clamp(1.8rem,3vw,2.4rem)">All of You</div>
+        <div class="stat-label">Have a Role</div>
+      </div>
+    </div>
+    <div class="card card-teal" style="max-width:720px;width:100%">
+      <ul class="bullet-list">
+        <li>Some of you will <span class="highlight">gather documents</span> when CPAs come knocking</li>
+        <li>Some of you are <span class="highlight">closing out year-end books</span> right now — that directly feeds the 990</li>
+        <li>All of you deserve to know <span class="highlight">what's actually happening</span> and why your work matters</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 · PARTICIPATION -->
+  <div class="slide" id="slide-3">
+    <span class="hand-icon">🙋</span>
+    <h2 class="slide-title">Raise Your Hand</h2>
+    <p class="slide-subtitle">...if you've ever seen a Form 990 before today.</p>
+    <div class="divider"></div>
+    <p class="body-text" style="text-align:center;max-width:540px;color:rgba(255,255,255,0.65)">
+      By the end of this, all hands should be up —<br>and you'll actually <span class="highlight">know what it means.</span>
+    </p>
+  </div>
+
+  <!-- SLIDE 4 · WHAT IS A 990 -->
+  <div class="slide" id="slide-4">
+    <h2 class="slide-title">What IS a 990?</h2>
+    <div class="card" style="max-width:760px;width:100%;margin-bottom:18px">
+      <p style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:1.2rem;color:var(--white);margin-bottom:12px">
+        A nonprofit's annual tax return, filed with the IRS.
+      </p>
+      <ul class="bullet-list">
+        <li>How nonprofits prove they're operating within the rules of their <span class="highlight">tax-exempt status</span></li>
+        <li>Unlike your personal taxes — it's <span class="highlight-orange">completely public.</span> Anyone can Google your client's 990 right now.</li>
+        <li>It tells the story of <span class="highlight">where money came from</span> and <span class="highlight">where it went</span> — programs, admin, fundraising</li>
+        <li>Miss 3 years in a row? The IRS <span class="highlight-orange">revokes the nonprofit status</span> automatically.</li>
+      </ul>
+    </div>
+    <div class="card card-teal" style="max-width:760px;width:100%">
+      <p style="text-align:center;font-family:'Montserrat',sans-serif;font-weight:700;font-size:1rem;color:rgba(255,255,255,0.85)">
+        💡 <span class="highlight">ProPublica Nonprofit Explorer</span> — free, public, anyone can look up any 990 for free. Donors and grantmakers use this to evaluate orgs.
+      </p>
+    </div>
+  </div>
+
+  <!-- SLIDE 5 · WHAT DOES A 990 LOOK LIKE -->
+  <div class="slide" id="slide-5">
+    <h2 class="slide-title" style="margin-bottom:16px">What Does It Actually Look Like?</h2>
+    <div class="form-mock-wrap">
+      <div class="form-mock">
+        <div class="form-mock-header">
+          <div>
+            <div class="form-num">Form <strong>990</strong> <span class="sample-badge">SAMPLE — FAKE DATA</span></div>
+            <div style="font-size:0.72rem;font-family:Arial,sans-serif;color:#333;margin-top:2px">Return of Organization Exempt From Income Tax</div>
+            <div style="font-size:0.68rem;font-family:Arial,sans-serif;color:#666">Department of the Treasury — Internal Revenue Service</div>
+          </div>
+          <div class="form-right">
+            <div>OMB No. 1545-0047</div>
+            <div><strong>2024</strong></div>
+          </div>
+        </div>
+        <div class="form-mock-row"><span class="form-mock-label">Name of organization</span><span class="form-mock-value">Community Action Alliance</span></div>
+        <div class="form-mock-row"><span class="form-mock-label">EIN</span><span class="form-mock-value">47-8832156</span></div>
+        <div class="form-mock-row"><span class="form-mock-label">Tax year</span><span class="form-mock-value">01/01/2024 – 12/31/2024</span></div>
+        <div class="form-mock-row"><span class="form-mock-label">Gross receipts</span><span class="form-mock-value form-mock-money">$432,500</span></div>
+        <div class="form-mock-section">PART I — SUMMARY</div>
+        <div class="form-mock-row"><span class="form-mock-label">1. Mission statement</span><span class="form-mock-value" style="max-width:55%;text-align:right">Advancing equity through community organizing and education</span></div>
+        <div class="form-mock-row"><span class="form-mock-label">3. Voting board members</span><span class="form-mock-value">9</span></div>
+        <div class="form-mock-section">REVENUE</div>
+        <div class="form-mock-row"><span class="form-mock-label">9. Contributions and grants</span><span class="form-mock-value form-mock-money">$385,000</span></div>
+        <div class="form-mock-row"><span class="form-mock-label">10. Program service revenue</span><span class="form-mock-value form-mock-money">$47,500</span></div>
+        <div class="form-mock-row"><span class="form-mock-label">12. <strong>Total revenue</strong></span><span class="form-mock-value form-mock-money"><strong>$432,500</strong></span></div>
+        <div class="form-mock-section">EXPENSES</div>
+        <div class="form-mock-row"><span class="form-mock-label">18. <strong>Total expenses</strong></span><span class="form-mock-value form-mock-money"><strong>$379,800</strong></span></div>
+        <div class="form-mock-row"><span class="form-mock-label">22. Net assets end of year</span><span class="form-mock-value form-mock-money">$217,400</span></div>
+        <div class="form-mock-section">PART VII — KEY COMPENSATION (highest paid)</div>
+        <div class="form-mock-row"><span class="form-mock-label">Executive Director</span><span class="form-mock-value form-mock-money">$85,000</span></div>
+        <div class="form-mock-row"><span class="form-mock-label">Program Director</span><span class="form-mock-value form-mock-money">$62,000</span></div>
+      </div>
+      <div class="form-callout">
+        <div class="callout-box">
+          <h3>It's a public document</h3>
+          <p>Every dollar on this form — revenue, salaries, grants — is visible to anyone with a browser. Donors, grantmakers, journalists, competitors.</p>
+        </div>
+        <div class="callout-box">
+          <h3>It comes from your books</h3>
+          <p>Every number here is built from QBO. The 990 is only as accurate as the year-end close your accounting team delivers.</p>
+        </div>
+        <div class="callout-box">
+          <h3>This is 12 pages + schedules</h3>
+          <p>The full 990 can run 50–100+ pages once all schedules are attached. The EZ is 4 pages. The Postcard is 5 questions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6 · MEET THE FAMILY (sumo fight) -->
+  <div class="slide" id="slide-6">
+    <h2 class="slide-title">Meet the 990 Family</h2>
+    <p class="slide-subtitle">Same tax-exempt universe. Very different weight classes.</p>
+    <div class="sumo-arena" id="sumo-arena">
+      <div class="sumo-wrapper">
+        <svg id="svg-n" viewBox="0 0 100 130" width="108" xmlns="http://www.w3.org/2000/svg">
+          <use href="#sumo-n"/>
+        </svg>
+        <div class="sumo-label" style="color:var(--lavender)">990-N</div>
+        <div class="sumo-sublabel">The Postcard</div>
+        <div class="sumo-sublabel" style="color:var(--lavender)">&lt; $50K</div>
+      </div>
+      <div id="impact-left" style="font-size:2rem;margin-bottom:72px;opacity:0">💥</div>
+      <div class="sumo-wrapper">
+        <svg id="svg-ez" viewBox="0 0 140 175" width="152" xmlns="http://www.w3.org/2000/svg">
+          <use href="#sumo-ez"/>
+        </svg>
+        <div class="sumo-label" style="color:var(--pink)">990-EZ</div>
+        <div class="sumo-sublabel">The Contender</div>
+        <div class="sumo-sublabel" style="color:var(--pink)">&lt; $200K</div>
+      </div>
+      <div id="impact-right" style="font-size:2rem;margin-bottom:72px;opacity:0">💥</div>
+      <div class="sumo-wrapper">
+        <svg id="svg-990" viewBox="0 0 200 250" width="196" xmlns="http://www.w3.org/2000/svg">
+          <use href="#sumo-990"/>
+        </svg>
+        <div class="sumo-label" style="color:var(--teal)">990</div>
+        <div class="sumo-sublabel">The Heavyweight</div>
+        <div class="sumo-sublabel" style="color:var(--teal)">$200K+</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7 · 990-N -->
+  <div class="slide" id="slide-7">
+    <div class="sumo-focus">
+      <svg viewBox="0 0 100 130" width="200" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <use href="#sumo-n"/>
+      </svg>
+      <div class="sumo-focus-info">
+        <div class="form-tag" style="color:var(--lavender)">The Postcard</div>
+        <div class="form-name">990-N</div>
+        <span class="badge badge-lavender" style="margin-bottom:18px;display:inline-block">Under $50K revenue</span>
+        <ul class="bullet-list">
+          <li>Literally just: <em>"We still exist, here's our gross revenue"</em></li>
+          <li>Filed <span class="highlight">online only</span> — no paper version exists</li>
+          <li>So simple they literally call it the Postcard 📬</li>
+          <li><span class="highlight-orange">Watch out:</span> threshold is a <strong>3-year average</strong> — one good fundraising year can bump you up</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8 · 990-EZ -->
+  <div class="slide" id="slide-8">
+    <div class="sumo-focus">
+      <svg viewBox="0 0 140 175" width="215" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <use href="#sumo-ez"/>
+      </svg>
+      <div class="sumo-focus-info">
+        <div class="form-tag" style="color:var(--pink)">The Contender</div>
+        <div class="form-name">990-EZ</div>
+        <span class="badge badge-pink" style="margin-bottom:18px;display:inline-block">Under $200K revenue</span>
+        <ul class="bullet-list">
+          <li><span class="highlight">4 pages</span> — shorter than the big one, but don't let the name fool you</li>
+          <li>Covers financial statements, officer info, and program descriptions</li>
+          <li>"EZ" stands for Easy. The IRS has a delightful sense of humor. 😐</li>
+          <li>Most of our smaller clients land here — this is where the volume is</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9 · 990 HEAVYWEIGHT -->
+  <div class="slide" id="slide-9">
+    <div class="sumo-focus">
+      <svg viewBox="0 0 200 250" width="225" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <use href="#sumo-990"/>
+      </svg>
+      <div class="sumo-focus-info">
+        <div class="form-tag" style="color:var(--teal)">The Heavyweight</div>
+        <div class="form-name">990</div>
+        <span class="badge badge-teal" style="margin-bottom:18px;display:inline-block">$200K+ revenue</span>
+        <ul class="bullet-list">
+          <li><span class="highlight">12 pages</span> plus up to 16 additional schedules</li>
+          <li>Full financials, all officer names and compensation, governance policies</li>
+          <li>Functional expense split: programs vs. admin vs. fundraising</li>
+          <li>This one <span class="highlight-orange">needs an army</span> — and that army is sitting in this room 💪</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10 · FINE PRINT -->
+  <div class="slide" id="slide-10">
+    <h2 class="slide-title">The Fine Print 🔍</h2>
+    <p class="slide-subtitle">The $50K postcard threshold is a <em>3-year average</em>, not a single-year number.</p>
+    <div class="card card-teal" style="max-width:720px;width:100%;margin-bottom:20px">
+      <p style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:1.1rem;color:white;margin-bottom:10px">Example:</p>
+      <p class="body-text">Year 1: <span class="highlight-orange">$100K</span> &nbsp;·&nbsp; Year 2: <span class="highlight-orange">$40K</span></p>
+      <p class="body-text" style="margin-top:6px">Average = <span class="highlight">$70K</span> → They file the <span class="highlight">990-EZ</span>. The little guy just grew up.</p>
+    </div>
+    <div class="card" style="max-width:720px;width:100%">
+      <ul class="bullet-list">
+        <li>Once you cross a threshold consistently, you stay in that tier</li>
+        <li>If an org shrinks back, they can downgrade — but it takes time</li>
+        <li>This is exactly why accurate year-end numbers matter so much — they determine next year's form</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 11 · AUDIT VS REVIEW VS NOTHING -->
+  <div class="slide" id="slide-11">
+    <h2 class="slide-title">Audit vs. Review vs. Nothing</h2>
+    <p class="slide-subtitle">Determined by state law and how much money the org raised.</p>
+    <div class="three-col" style="max-width:940px;width:100%;margin-bottom:18px">
+      <div class="audit-col" style="background:rgba(241,94,34,0.1);border:1px solid rgba(241,94,34,0.3)">
+        <div class="icon">🔬</div>
+        <h3 style="color:var(--orange)">Audit</h3>
+        <p class="body-text" style="font-size:clamp(0.9rem,1.4vw,1rem)">Full independent examination. CPA tests transactions, issues a formal opinion. Required by certain states above revenue thresholds.</p>
+      </div>
+      <div class="audit-col" style="background:rgba(120,144,205,0.1);border:1px solid rgba(120,144,205,0.3)">
+        <div class="icon">🔍</div>
+        <h3 style="color:var(--periwinkle)">Review</h3>
+        <p class="body-text" style="font-size:clamp(0.9rem,1.4vw,1rem)">Less intensive. CPA asks questions, runs analytics, issues limited assurance. Real work — just not full testing of every transaction.</p>
+      </div>
+      <div class="audit-col" style="background:rgba(29,211,176,0.1);border:1px solid rgba(29,211,176,0.3)">
+        <div class="icon">🎉</div>
+        <h3 style="color:var(--teal)">Nothing</h3>
+        <p class="body-text" style="font-size:clamp(0.9rem,1.4vw,1rem)">Lucky them! Smaller orgs or certain states don't require an independent financial review. File the 990 and done.</p>
+      </div>
+    </div>
+    <div class="card card-teal" style="max-width:940px;width:100%">
+      <p style="text-align:center;font-family:'Montserrat',sans-serif;font-weight:700;font-size:1rem;color:white">
+        📋 Every state is different. We built a master guide: <span class="highlight">"Taxes — Audit Requirements by State (2025)"</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- SLIDE 12 · PBS PROCESS -->
+  <div class="slide" id="slide-12">
+    <h2 class="slide-title">How Tax Season Works at PBS</h2>
+    <div class="steps" style="max-width:800px;width:100%">
+      <div class="step">
+        <span class="step-num">1</span>
+        <span class="step-text">Close the year-end books. Reconcile all intercompany transactions.</span>
+        <span class="step-person">Accounting Team</span>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <span class="step-text">Get CPA quotes, send engagement letters, file extensions (Form 8868).</span>
+        <span class="step-person">Natalie</span>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <span class="step-text">CPA onboards, sets up a client portal per engagement for document exchange.</span>
+        <span class="step-person">CPA + Natalie</span>
+      </div>
+      <div class="step">
+        <span class="step-num">4</span>
+        <span class="step-text">Document requests go out as Karbon tasks and CPA portal assignments.</span>
+        <span class="step-person">Everyone 👋</span>
+      </div>
+      <div class="step">
+        <span class="step-num">5</span>
+        <span class="step-text">Testing phase, CPA drafts the 990, PBS reviews, corrections made, final filing.</span>
+        <span class="step-person">CPA + Natalie</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13 · TOOLS WE USE -->
+  <div class="slide" id="slide-13">
+    <h2 class="slide-title">Tools We Use 🛠️</h2>
+    <p class="slide-subtitle">The tech stack behind every 990 season</p>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <span class="tool-icon">📋</span>
+        <div class="tool-name">Karbon</div>
+        <p class="tool-desc">Task tracking &amp; client workflows. "If it didn't happen in Karbon, it didn't happen."</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">📊</span>
+        <div class="tool-name">QuickBooks Online</div>
+        <p class="tool-desc">Source of truth for all client financials. Where every 990 number lives.</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">💳</span>
+        <div class="tool-name">Ramp</div>
+        <p class="tool-desc">Expense management. Clients code transactions here before we sync to QBO.</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">🗄️</span>
+        <div class="tool-name">Airtable</div>
+        <p class="tool-desc">Client data submissions and structured information intake.</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">🏢</span>
+        <div class="tool-name">CPA Client Portals</div>
+        <p class="tool-desc">Secure document exchange with auditors and tax preparers. One portal per engagement.</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">📁</span>
+        <div class="tool-name">Google Drive</div>
+        <p class="tool-desc">Shared document storage. Save the link — searching by name doesn't work here.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 14 · DOCUMENT GATHERERS -->
+  <div class="slide" id="slide-14">
+    <h2 class="slide-title">Your Role: Document Gatherers 📁</h2>
+    <div class="two-col" style="max-width:940px;width:100%">
+      <div>
+        <h3 style="color:var(--periwinkle);margin-bottom:14px;font-family:'Montserrat',sans-serif;font-size:1.1rem">What CPAs Typically Request</h3>
+        <ul class="bullet-list">
+          <li>Bank &amp; investment statements (year-end)</li>
+          <li>Payroll records — wages by employee &amp; role</li>
+          <li>Invoices, vendor contracts, large receipts</li>
+          <li>EINs, org documents, prior year 990</li>
+          <li>Grant award letters &amp; restricted fund details</li>
+          <li>Board meeting minutes (yes, really)</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color:var(--teal);margin-bottom:14px;font-family:'Montserrat',sans-serif;font-size:1.1rem">How to Submit</h3>
+        <ul class="bullet-list">
+          <li>CPA client portal — each audit/review has its own</li>
+          <li>Karbon task — mark it done when you upload</li>
+          <li>When in doubt: ask Natalie <em>before</em> the deadline</li>
+        </ul>
+        <div class="card card-teal" style="margin-top:16px">
+          <p style="font-size:0.95rem;color:white;font-family:'Montserrat',sans-serif;font-weight:700">
+            ⚡ CPAs bill by the hour. Slow responses = expensive delays = unhappy clients.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 15 · YEAR-END CLOSE TEAM -->
+  <div class="slide" id="slide-15">
+    <h2 class="slide-title">Your Role: Year-End Close Team 📊</h2>
+    <p class="slide-subtitle">Clean books = smooth tax season. That's the whole thing.</p>
+    <div class="two-col" style="max-width:940px;width:100%">
+      <div class="card" style="border-color:rgba(29,211,176,0.35)">
+        <h3 style="color:var(--teal);margin-bottom:12px;font-family:'Montserrat',sans-serif;font-size:1.05rem">Accounting Team — The Foundation</h3>
+        <ul class="bullet-list">
+          <li>All transactions coded with the right category &amp; class</li>
+          <li>Intercompany transactions fully reconciled</li>
+          <li>Bank reconciliations complete across all accounts</li>
+          <li>Year-end close marked done in Karbon</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:rgba(255,178,185,0.35)">
+        <h3 style="color:var(--pink);margin-bottom:12px;font-family:'Montserrat',sans-serif;font-size:1.05rem">Why It Directly Impacts the 990</h3>
+        <ul class="bullet-list">
+          <li>CPAs build the 990 line by line from your QBO numbers</li>
+          <li>Functional expense split comes entirely from how transactions are coded</li>
+          <li>One miscoded transaction can delay an entire filing</li>
+          <li>Messy books = expensive back-and-forth = late 990</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 16 · WHAT'S NEXT -->
+  <div class="slide" id="slide-16">
+    <!-- PBS logo small -->
+    <svg viewBox="0 0 230 72" width="190" style="opacity:0.6;margin-bottom:14px" xmlns="http://www.w3.org/2000/svg">
+      <rect x="13" y="4"  width="36" height="24" rx="4" fill="#7890CD" transform="rotate(16,31,26)"/>
+      <rect x="13" y="4"  width="36" height="24" rx="4" fill="#CFC5FE" transform="rotate(2,31,26)"/>
+      <rect x="13" y="4"  width="36" height="24" rx="4" fill="#FFB2B9" transform="rotate(-14,31,26)"/>
+      <rect x="5"  y="22" width="52" height="46" rx="8" fill="#1DD3B0"/>
+      <rect x="5"  y="30" width="52" height="38" fill="#1DD3B0"/>
+      <rect x="5"  y="60" width="52" height="8"  rx="8" fill="#1DD3B0"/>
+      <rect x="5"  y="22" width="52" height="12" rx="6" fill="#17b899"/>
+      <circle cx="31" cy="46" r="6.5" fill="#13967e"/>
+      <circle cx="31" cy="46" r="3.5" fill="#1DD3B0"/>
+      <text x="68" y="40" font-family="Montserrat,Arial" font-weight="900" font-size="20" fill="#FFFFFF" letter-spacing="0.5">POCKETBOOK</text>
+      <text x="68" y="58" font-family="Montserrat,Arial" font-weight="600" font-size="11" fill="#1DD3B0" letter-spacing="4">STRATEGIES</text>
+    </svg>
+    <h2 class="slide-title" style="margin-bottom:6px">What's Next</h2>
+    <p class="slide-subtitle" style="margin-bottom:22px">Here's where we are on the calendar.</p>
+    <div class="key-dates" style="margin-bottom:26px">
+      <div class="date-card">
+        <div class="date">Now</div>
+        <div class="date-label">Year-end close<br>in progress ✅</div>
+      </div>
+      <div class="date-card">
+        <div class="date">May 15</div>
+        <div class="date-label">Original 990 deadline<br>(or file Form 8868)</div>
+      </div>
+      <div class="date-card">
+        <div class="date">Nov 15</div>
+        <div class="date-label">Extended deadline<br>for most clients</div>
+      </div>
+    </div>
+    <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:clamp(2rem,4.5vw,3.2rem);color:var(--teal);text-align:center;margin-bottom:8px">
+      Questions?
+    </div>
+    <p class="body-text" style="color:rgba(255,255,255,0.45);text-align:center;font-size:1rem">
+      You now know more about 990s than the average American. Use that power responsibly.
+    </p>
+  </div>
+
+</div><!-- /.deck -->
+
+<!-- Fixed UI -->
+<button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8249;</button>
+<button class="nav-btn" id="next-btn" onclick="navigate(1)">&#8250;</button>
+<div class="progress" id="progress-bar"></div>
+<div class="counter" id="counter">1 / 16</div>
+<div class="watermark">Built with Claude Code ✨</div>
+
+<script>
+// =====================================================
+// SLIDE NAVIGATION
+// =====================================================
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+const total = slides.length;
+
+function navigate(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= total) return;
+  slides[current].classList.remove('active');
+  if (dir > 0) slides[current].classList.add('prev');
+  current = next;
+  slides[current].classList.remove('prev');
+  slides[current].classList.add('active');
+  updateUI();
+  if (current === 5) setTimeout(startSumoFight, 450); // Meet the Family slide
+}
+
+function updateUI() {
+  const pct = ((current + 1) / total * 100).toFixed(1);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+  document.getElementById('prev-btn').style.opacity = current === 0 ? '0.2' : '1';
+  document.getElementById('next-btn').style.opacity = current === total - 1 ? '0.2' : '1';
+}
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight','ArrowDown',' '].includes(e.key)) { e.preventDefault(); navigate(1); }
+  if (['ArrowLeft','ArrowUp'].includes(e.key))         { e.preventDefault(); navigate(-1); }
+});
+updateUI();
+
+// =====================================================
+// PARTICLE BACKGROUND (all slides)
+// =====================================================
+(function() {
+  const canvas = document.getElementById('particle-canvas');
+  const ctx    = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const colors = ['#1DD3B0','#CFC5FE','#FFB2B9','#7890CD','#F4D6AD'];
+  const pts = Array.from({length: 80}, () => ({
+    x:  Math.random() * window.innerWidth,
+    y:  Math.random() * window.innerHeight,
+    r:  Math.random() * 2.5 + 0.8,
+    vx: (Math.random() - 0.5) * 0.4,
+    vy: (Math.random() - 0.5) * 0.4,
+    a:  Math.random() * 0.45 + 0.2,
+    c:  colors[Math.floor(Math.random() * colors.length)]
+  }));
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pts.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.c;
+      ctx.globalAlpha = p.a;
+      ctx.fill();
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width)  p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// =====================================================
+// SUMO FIGHT ANIMATION
+// =====================================================
+function startSumoFight() {
+  const svgN   = document.getElementById('svg-n');
+  const svgEz  = document.getElementById('svg-ez');
+  const svg990 = document.getElementById('svg-990');
+  const impL   = document.getElementById('impact-left');
+  const impR   = document.getElementById('impact-right');
+  if (!svgN) return;
+
+  [svgN, svgEz, svg990].forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight; // force reflow
+  });
+  impL.style.opacity = '1';
+  impR.style.opacity = '1';
+
+  svgN.style.animation   = 'clash-right 2.4s ease-in-out 4';
+  svgEz.style.animation  = 'sumo-bounce 1.8s ease-in-out infinite';
+  svg990.style.animation = 'clash-left  2.4s ease-in-out 4';
+  impL.style.animation   = 'impact-pulse 2.4s ease-in-out 4';
+  impR.style.animation   = 'impact-pulse 2.4s ease-in-out 4 0.12s';
+
+  // Clean up after 4 cycles
+  setTimeout(() => {
+    if (svgEz) svgEz.style.animation = 'none';
+    if (impL)  { impL.style.animation = 'none'; impL.style.opacity = '0'; }
+    if (impR)  { impR.style.animation = 'none'; impR.style.opacity = '0'; }
+  }, 9800);
+}
+
+// =====================================================
+// CONFETTI
+// =====================================================
+function fireConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors  = ['#1DD3B0','#FFB2B9','#CFC5FE','#F15E22','#7890CD','#F4D6AD','#FFFFFF'];
+  const pieces  = Array.from({length: 140}, () => ({
+    x:     Math.random() * canvas.width,
+    y:     -20 - Math.random() * 60,
+    r:     Math.random() * 7 + 3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    vx:    (Math.random() - 0.5) * 8,
+    vy:    Math.random() * 3 + 2,
+    spin:  (Math.random() - 0.5) * 0.22,
+    angle: Math.random() * Math.PI * 2,
+    shape: Math.random() > 0.5 ? 'circle' : 'rect'
+  }));
+  let frames = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'circle') {
+        ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill();
+      } else {
+        ctx.fillRect(-p.r, -p.r * 0.5, p.r * 2, p.r);
+      }
+      ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.angle += p.spin;
+    });
+    frames++;
+    if (frames < 200) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+window.addEventListener('resize', () => {
+  const cc = document.getElementById('confetti-canvas');
+  cc.width = window.innerWidth; cc.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
